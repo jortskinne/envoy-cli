@@ -43,6 +43,11 @@ type SyncResult struct {
 	Unchanged []string
 }
 
+// HasChanges reports whether any additions, updates, or removals occurred.
+func (r SyncResult) HasChanges() bool {
+	return len(r.Added) > 0 || len(r.Updated) > 0 || len(r.Removed) > 0
+}
+
 // Sync merges source entries into target entries according to opts.
 // It returns the merged entry slice and a SyncResult describing what changed.
 func Sync(source, target []parser.Entry, opts SyncOptions) ([]parser.Entry, SyncResult, error) {
