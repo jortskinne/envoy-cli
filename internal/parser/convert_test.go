@@ -91,3 +91,15 @@ func TestConvert_UnsupportedFormat(t *testing.T) {
 		t.Error("expected error for unsupported format")
 	}
 }
+
+func TestConvert_EmptyEntries(t *testing.T) {
+	formats := []OutputFormat{FormatDotEnv, FormatExport, FormatJSON, FormatYAML}
+	for _, fmt := range formats {
+		opts := DefaultConvertOptions()
+		opts.Format = fmt
+		_, err := Convert([]EnvEntry{}, opts)
+		if err != nil {
+			t.Errorf("format %q: unexpected error for empty entries: %v", fmt, err)
+		}
+	}
+}
