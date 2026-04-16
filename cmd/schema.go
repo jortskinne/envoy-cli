@@ -46,14 +46,7 @@ func runSchema(cmd *cobra.Command, args []string) error {
 		existing[e.Key] = e.Value
 	}
 
-	missing := []string{}
-	for _, k := range required {
-		if _, ok := existing[k]; !ok {
-			missing = append(missing, k)
-		}
-	}
-
-	if len(missing) > 0 {
+	if missing := missingKeys(required, existing); len(missing) > 0 {
 		fmt.Fprintf(cmd.OutOrStdout(), "Missing required keys:\n")
 		for _, k := range missing {
 			fmt.Fprintf(cmd.OutOrStdout(), "  - %s\n", k)
@@ -72,4 +65,15 @@ func runSchema(cmd *cobra.Command, args []string) error {
 
 	fmt.Fprintln(cmd.OutOrStdout(), "Schema validation passed.")
 	return nil
+}
+
+// missingKeys returns the keys from required that are not present in existing.
+func missingKeys(required []string, existing map[string]string) []string {
+	var missing []string
+	for _, k := range required {
+		if _, ok := existing[k]; !ok {
+			missing = append(missing, k)
+		}
+	}
+	return missing
 }
