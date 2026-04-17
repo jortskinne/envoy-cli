@@ -33,32 +33,9 @@ func runPatch(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("parse: %w", err)
 	}
 
-	var ops []parser.PatchOperation
-
-	if sets, _ := cmd.Flags().GetStringArray("set"); len(sets) > 0 {
-		for _, s := range sets {
-			parts := strings.SplitN(s, "=", 2)
-			if len(parts) != 2 {
-				return fmt.Errorf("--set value must be KEY=VALUE, got: %s", s)
-			}
-			ops = append(ops, parser.PatchOperation{Action: "set", Key: parts[0], Value: parts[1]})
-		}
-	}
-
-	if deletes, _ := cmd.Flags().GetStringArray("delete"); len(deletes) > 0 {
-		for _, k := range deletes {
-			ops = append(ops, parser.PatchOperation{Action: "delete", Key: k})
-		}
-	}
-
-	if renames, _ := cmd.Flags().GetStringArray("rename"); len(renames) > 0 {
-		for _, r := range renames {
-			parts := strings.SplitN(r, "=", 2)
-			if len(parts) != 2 {
-				return fmt.Errorf("--rename value must be OLD=NEW, got: %s", r)
-			}
-			ops = append(ops, parser.PatchOperation{Action: "rename", Key: parts[0], NewKey: parts[1]})
-		}
+	ops, err := buildPatchOps(cmd)
+	if err != nil {
+		return err
 	}
 
 	ignoreMissing, _ := cmd.Flags().GetBool("ignore-missing")
@@ -77,4 +54,37 @@ func runPatch(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	return parser.WriteEnvFile(filePath, result)
+}
+
+// buildPatchOps constructs a slice of PatchOperations from the command flags.
+func buildPatchOps(cmd *cobra.Command) ([]parser.PatchOperation, error) {
+	var ops []parser.PatchOperation
+
+	if sets, _ := cmd.Flags().GetStringArray("set"); len(sets) > 0 {
+		for _, s := range sets {
+			parts := strings.SplitN(s, "=", 2)
+			if len(parts) != 2 {
+				return nil, fmt.Errorf("--set value must be KEY=VALUE, got: %s", s)
+			}
+			ops = append(ops, parser.PatchOperation{Action: "set", Key: parts[0], Value: parts[1]})
+		}
+	}
+
+	if deletes, _ := cmd.Flags().GetStringArray("delete"); len(deletes) > 0 {
+		for _, k := range deletes {
+			ops = append(ops, parser.PatchOperation{Action: "delete", Key: k})
+		}
+	}
+
+	if renames, _ := cmd.Flags().GetStringArray("rename"); len(renames) > 0 {
+		for _, r := range renames {
+			parts := strings.SplitN(r, "=", 2)
+			if len(parts) != 2 {
+				return nil, fmt.Errorf("--rename value must be OLD=NEW, got: %s", r)
+			}
+			ops = append(ops, parser.PatchOperation{Action: "rename", Key: parts[0], NewKey: parts[1]})
+		}
+	}
+
+	return ops, nil
 }
