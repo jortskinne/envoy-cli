@@ -38,7 +38,11 @@ func runPatch(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	ignoreMissing, _ := cmd.Flags().GetBool("ignore-missing")
+	if len(ops) == 0 {
+		return fmt.Errorf("no operations specified: use --set, --delete, or --rename")
+	}
+
+	ignoeMissing, _ := cmd.Flags().GetBool("ignore-missing")
 	opts := parser.PatchOptions{IgnoreMissing: ignoreMissing}
 
 	result, err := parser.Patch(entries, ops, opts)
