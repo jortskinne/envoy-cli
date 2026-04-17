@@ -1,60 +1,45 @@
 # envoy-cli
 
-> A CLI tool to diff, validate, and sync `.env` files across environments with secret masking support.
+A CLI tool to diff, validate, and sync `.env` files across environments with secret masking support.
 
----
+## Commands
 
-## Installation
-
-```bash
-go install github.com/yourusername/envoy-cli@latest
-```
-
-Or download a pre-built binary from the [Releases](https://github.com/yourusername/envoy-cli/releases) page.
-
----
+- `diff` — Compare two `.env` files and report added, removed, or changed keys
+- `validate` — Validate a `.env` file against a schema
+- `sync` — Sync keys from a source `.env` into a target
+- `audit` — Generate an audit log of changes between two `.env` files
+- `convert` — Convert `.env` to JSON, export format, or dotenv
+- `encrypt` / `decrypt` — Encrypt or decrypt sensitive values
+- `lint` — Lint a `.env` file for style issues
+- `interpolate` — Resolve variable references within a `.env` file
+- `merge` — Merge two `.env` files
+- `filter` — Filter entries by key, prefix, or sensitivity
+- `sort` — Sort entries alphabetically or by group
+- `dedupe` — Remove duplicate keys
+- `promote` — Promote entries from one environment to another
+- `trim` — Trim whitespace and optional quotes from keys/values
+- `stats` — Show statistics about a `.env` file
+- `clone` — Clone entries from one `.env` into another with optional prefix stripping
+- `patch` — Apply set/delete/rename patches to a `.env` file
+- `flatten` — Flatten nested key prefixes using a separator
+- `template` — Render a template file using `.env` values
+- `rename` — Rename a key in a `.env` file
+- `compare` — Deep compare two `.env` files with match/mismatch reporting
+- `grep` — Search for entries matching a regex pattern
+- `schema` — Validate against and apply defaults from a schema file
 
 ## Usage
 
 ```bash
-# Diff two .env files
-envoy diff .env.development .env.production
-
-# Validate a .env file against a template
-envoy validate .env --template .env.example
-
-# Sync missing keys from one environment to another
-envoy sync .env.staging .env.production
-
-# Mask secrets when outputting a diff
-envoy diff .env.local .env.production --mask-secrets
+envoy-cli diff base.env target.env
+envoy-cli validate app.env --schema schema.yaml
+envoy-cli sync base.env target.env --overwrite
+envoy-cli grep '^DB_' .env --keys-only
+envoy-cli grep 'secret' .env --values-only --invert
 ```
 
-**Example output:**
+## Installation
 
+```bash
+go build -o envoy-cli ./main.go
 ```
-[+] NEW_API_KEY        (only in production)
-[-] DEBUG_MODE         (only in development)
-[~] DATABASE_URL       (value differs)
-```
-
----
-
-## Features
-
-- 🔍 **Diff** — spot missing or mismatched keys between env files
-- ✅ **Validate** — ensure all required keys are present
-- 🔄 **Sync** — propagate missing keys across environments
-- 🔒 **Secret masking** — safely share diffs without exposing sensitive values
-
----
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
----
-
-## License
-
-[MIT](LICENSE) © 2024 yourusername
