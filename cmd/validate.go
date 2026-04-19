@@ -72,11 +72,19 @@ func runValidate(filePath, requiredKeys, outputFormat, outputFile string, disall
 		return fmt.Errorf("failed to write report: %w", err)
 	}
 
-	for _, r := range results {
-		if r.Level == "error" {
-			os.Exit(1)
-		}
+	if hasErrors(results) {
+		os.Exit(1)
 	}
 
 	return nil
+}
+
+// hasErrors returns true if any validation result has a level of "error".
+func hasErrors(results []validator.Result) bool {
+	for _, r := range results {
+		if r.Level == "error" {
+			return true
+		}
+	}
+	return false
 }
