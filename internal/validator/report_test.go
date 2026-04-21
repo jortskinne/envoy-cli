@@ -76,3 +76,11 @@ func TestWriteValidationReport_JSONWithErrors(t *testing.T) {
 		t.Errorf("expected 1 error in JSON output")
 	}
 }
+
+func TestWriteValidationReport_UnknownFormat(t *testing.T) {
+	var buf bytes.Buffer
+	err := WriteValidationReport(&buf, ValidationResult{}, "xml")
+	if err == nil {
+		t.Errorf("expected error for unsupported format 'xml', got nil")
+	}
+}
