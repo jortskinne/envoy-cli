@@ -95,3 +95,40 @@ func TestWatch_ErrorCallbackOnParseFailure(t *testing.T) {
 		t.Error("expected OnError to be called after file removal")
 	}
 }
+
+func TestWatch_DetectsChange_EntryValues(t *testing.T) {
+	path := writeWatchTempEnv(t, "FOO=bar\n")
+
+	var mu sync.Mutex
+	var received []EnvEntry
+
+	opts := DefaultWatchOptions()
+	opts.Interval = 50 * time.Millisecond
+	opts.OnChange = func(entries []EnvEntry) {
+		mu.Lock()
+		defer mu.Unlock()
+		received = entries
+	}
+
+	done := make(chan struct{})
+	go func() { _ = Watch(path, opts, done) }()
+
+	time.Sleep(80 * time.Millisecond)
+	_ = os.WriteFile(path, []byte("FOO=changed\nBAR=new\n"), 0644)
+	time.Sleep(150 * time.Millisecond)
+	close(done)
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	entryMap := make(map[string]string, len(received))
+	for _, e := range received {
+		entryMap[e.Key] = e.Value
+	}
+	if entryMap["FOO"] != "changed" {
+		t.Errorf("expected FOO=changed, got FOO=%s", entryMap["FOO"])
+	}
+	if entryMap["BAR"] != "new" {
+		t.Errorf("expected BAR=new, got BAR=%s", entryMap["BAR"])
+	}
+}
